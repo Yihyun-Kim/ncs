@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>평가 페이지 - 5문항 예시 구성</title>
+  <style>
+    /* Reset 및 전역 스타일 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      display: flex;
+    }
+    /* 왼쪽 고정 툴바 */
+    #sidebar {
+      width: 220px;
+      background-color: #fff;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    #sidebar h3 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #sidebar a {
+      display: block;
+      padding: 10px;
+      margin: 5px 0;
+      text-decoration: none;
+      color: #333;
+      text-align: center;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    #sidebar a:hover {
+      background-color: #ddd;
+    }
+    /* 메인 콘텐츠 영역 */
+    .main-wrapper {
+      margin-left: 260px; /* 툴바 공간 고려 */
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .question-container {
+      background-color: #fff;
+      width: 95%;
+      max-width: 1200px;  /* 화면 여유 확대 */
+      padding: 30px;
+      margin: 20px 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    /* 각 문제 섹션 (한 페이지만 보이게) */
+    section {
+      display: none;
+      text-align: left;
+      line-height: 1.6;
+    }
+    section.active {
+      display: block;
+    }
+    .question-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .question-header h2 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+    /* NCS 내용 */
+    .ncs-content {
+      background-color: #eef;
+      padding: 15px;
+      margin-bottom: 20px;
+      white-space: pre-line;
+      border-radius: 4px;
+    }
+    /* Ground Truth 영역 */
+    .ground-truth {
+      background-color: #ddf;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 6px solid #99c;
+      white-space: pre-line;
+      border-radius: 4px;
+    }
+    .ground-truth h3 {
+      margin-bottom: 8px;
+    }
+    /* 추가 내용 영역: 카드 형태로 구분 */
+    .additional-container {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+    }
+    .additional-number {
+      font-weight: bold;
+      margin-right: 15px;
+      min-width: 40px;
+      text-align: center;
+      font-size: 18px;
+      color: #555;
+    }
+    .additional-text {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+    /* 평가 영역 */
+    .rating-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f4f4f4;
+      border-radius: 4px;
+    }
+    .rating-section h4 {
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .rating-item {
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .rating-item label {
+      margin-right: 10px;
+      min-width: 220px;
+      font-weight: bold;
+    }
+    .rating-options label {
+      margin-right: 12px;
+      cursor: pointer;
+    }
+    .rating-options input[type="radio"] {
+      margin-right: 4px;
+    }
+    /* 하단 네비게이션 버튼 */
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 95%;
+      max-width: 1200px;
+      padding: 15px 20px;
+      background-color: #fff;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+    .nav-buttons button {
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .nav-buttons button:disabled {
+      background-color: #ccc;
+      cursor: default;
+    }
+    .progress {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <!-- 왼쪽 고정 툴바 -->
+  <div id="sidebar">
+    <h3>문제 선택</h3>
+    <div id="sidebar-links">
+      <!-- 자바스크립트로 문제 링크 생성 -->
+    </div>
+  </div>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <div class="main-wrapper">
+    <div class="question-container" id="question-container">
+      <!-- 문제 섹션들을 자바스크립트로 생성 -->
+    </div>
+    <!-- 하단 네비게이션 버튼 -->
+    <div class="nav-buttons">
+      <button id="prevButton">이전</button>
+      <span class="progress" id="progressIndicator">문제 1 / 5</span>
+      <div>
+        <button id="nextButton">다음</button>
+        <button id="submitButton" style="display: none;">제출</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 미리 준비한 5문항의 데이터 (txt파일 내용을 기반으로 함)
+    const questionsData = [
+      {
+        ncs: `[Motor nerve conduction study + F-Wave study]
+1. 우측 median nerve에서 terminal latency는 정상임. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+2. 우측 peroneal nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, fibula (head)에서 자극시 정상 범위. motor NCV는 Ankle to Fibula (head) 구간에서 정상임. F-wave latency는 연장됨.
+3. 우측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to Popliteal fossa 구간에서 conduction block 소견(6.3/10.1=62%, 38% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음. motor NCV는 Ankle to Popliteal fossa 구간에서 정상임. F-wave latency는 정상 범위임.
+4. 우측 ulnar nerve에서 terminal latency는 정상임. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+
+[Sensory nerve conduction study]
+1. 우측 median nerve에서 SNAP amplitude는 Elbow to Axilla, Finger to Wrist, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Finger to Wrist 구간에서 감소함. Elbow to Axilla, Wrist to Elbow 구간에서 정상범위임.
+2. 우측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 정상범위임. sensory NCV는 Ankle to Knee 구간에서 정상범위임.
+3. 우측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 정상범위임. sensory NCV는 Posterior Calf 구간에서 정상범위임.
+4. 우측 ulnar nerve에서 SNAP amplitude는 Elbow to Axilla, Finger to Wrist, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Elbow to Axilla, Finger to Wrist, Wrist to Elbow 구간에서 정상범위임.
+
+[H-wave study]
+1. 우측 tibial nerve H-wave latency는 연장됨.
+2. 좌측 tibial nerve H-wave latency는 연장됨.
+
+[Demyelinating features]
+1. 우측 tibial nerve에서 우측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to Popliteal fossa 구간에서 conduction block 소견(6.3/10.1=62%, 38% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음.`,
+        groundTruth: `1. Electrophysiological findings are suspicious for early stage of polyneuropathy or lumbosacral radiculopathy. An EMG study is recommended to differentiate radiculopathy.
+2. Clinical correlation is required.`,
+        additional: [
+          `# 1)
+1. Electrophysiological findings weakly suggest sensorimotor polyneuropathy (demyelinating type), evidenced by prolonged F‑wave latencies in the right median, ulnar, and peroneal nerves, decreased sensory NCV in the right median nerve, and bilateral prolonged tibial H‑wave latencies; the conduction block noted in the right tibial nerve is likely attributable to technical factors.
+2. Clinical correlation is required.`,
+          `# 2)
+1. Electrophysiological findings suggest right carpal tunnel syndrome (Grade 1).
+2. Electrophysiological findings are suspicious for early stage of polyneuropathy or lumbosacral radiculopathy. An EMG study is recommended to differentiate radiculopathy.
+3. For right tibial nerve showing conduction block with normal motor conduction velocity, consideration of a potential technical error is necessary.
+4. Clinical correlation is required.`,
+          `# 3)
+1. Electrophysiological findings are suspicious for early stage of polyneuropathy or lumbosacral radiculopathy. An EMG study is recommended to differentiate radiculopathy.
+2. Electrophysiological findings suggest conduction block in right tibial nerve. However, motor conduction velocity is within the normal range, warranting consideration of a potential technical error.
+3. Electrophysiological findings suggest sensory polyneuropathy.
+4. Clinical correlation is required.`,
+          `# Clinical rationale
+1. Prolonged F‑wave latencies in the median, ulnar, and peroneal nerves suggest delayed proximal conduction.
+2. Bilateral prolonged tibial H‑wave latencies further support potential involvement at a proximal level (e.g., spinal roots).
+3. Normal sensory amplitudes with a mild decrease in median sensory NCV localize early changes primarily to proximal segments or motor pathways.
+4. The right tibial conduction block is not classified as demyelinating for the tibial nerve, but remains an abnormal finding.`
+        ]
+      },
+      {
+        ncs: `[Motor nerve conduction study + F-Wave study]
+1. 우측 median nerve에서 terminal latency는 정상임. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 정상 범위임.
+2. 우측 peroneal nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, fibula (head)에서 자극시 정상 범위. motor NCV는 Ankle to Fibula (head) 구간에서 정상임. F-wave latency는 정상 범위임.
+3. 우측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to Popliteal fossa 구간에서 conduction block 소견(11.1/16.5=67%, 33% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음. motor NCV는 Ankle to Popliteal fossa 구간에서 정상임. F-wave latency는 정상 범위임.
+4. 우측 ulnar nerve에서 terminal latency는 정상임. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 정상 범위임.
+
+[Sensory nerve conduction study]
+1. 우측 median nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Finger to Wrist 구간, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Elbow to Axilla, Finger to Wrist, Wrist to Elbow 구간에서 정상범위임.
+2. 우측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 정상범위임. sensory NCV는 Ankle to Knee 구간에서 정상범위임.
+3. 우측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 정상범위임. sensory NCV는 Posterior Calf 구간에서 정상범위임.
+4. 우측 ulnar nerve에서 SNAP amplitude는 Elbow to Axilla, Finger to Wrist, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Elbow to Axilla, Finger to Wrist, Wrist to Elbow 구간에서 정상범위임.
+
+[H-wave study]
+1. 우측 tibial nerve H-wave latency는 정상범위임.
+2. 좌측 tibial nerve H-wave latency는 정상범위임.
+
+[Demyelinating features]
+1. 우측 tibial nerve에서 우측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to popliteal fossa 구간에서 conduction block 소견(11.1/16.5=67%, 33% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음.`,
+        groundTruth: `1. No electrophysiological abnormalities were observed in the examination.
+2. Clinical correlation is required.`,
+        additional: [
+          `# 1)
+1. Electrophysiological findings suggest conduction block in the right tibial nerve; however, motor NCV remains within normal limits, warranting consideration of a potential technical error.
+2. Clinical correlation is required.`,
+          `# 2)
+1. Electrophysiological findings suggest conduction block in right tibial nerve. However, motor conduction velocity is within the normal range, warranting consideration of a potential technical error.
+2. Clinical correlation is required.`,
+          `# 3)
+1. No electrophysiological abnormalities were observed in the examination.
+2. Electrophysiological findings suggest conduction block in right tibial nerve. However, motor conduction velocity is within the normal range, warranting consideration of a potential technical error.
+3. Clinical correlation is required.`,
+          `# Clinical rationale
+1. Prolonged F‑wave latencies in the right median, peroneal, and ulnar nerves indicate possible proximal conduction delay.
+2. Bilateral prolongation of the tibial H‑wave suggests additional involvement at the spinal root or proximal nerve level.
+3. The conduction block in the right tibial nerve is not considered demyelinating, but it remains an abnormal finding.
+4. Normal sensory nerve conduction in most nerves, with only mild slowing in the right median nerve, supports a predominantly motor or proximal involvement.
+5. Overall, these findings raise the possibility of early polyneuropathy or lumbosacral radiculopathy, necessitating EMG and clinical correlation.`
+        ]
+      },
+      {
+        ncs: `[Motor nerve conduction study + F-Wave study]
+1. 우측 median nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+2. 우측 peroneal nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ta에서 자극시 정상 범위. ankle, fibula (head)에서 자극시 감소함. motor NCV는 Ankle to Fibula (head) 구간에서 정상임. F-wave latency는 연장됨.
+3. 우측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to popliteal fossa 구간에서 conduction block 소견(5.2/8.6=60%, 40% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음. motor NCV는 Ankle to Popliteal fossa 구간에서 정상임. F-wave latency는 연장됨.
+4. 우측 ulnar nerve에서 terminal latency는 정상임. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 정상 범위임.
+5. 좌측 median nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 정상 범위임.
+6. 좌측 peroneal nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, fibula (head)에서 자극시 정상 범위. motor NCV는 Ankle to Fibula (head) 구간에서 정상임. F-wave latency는 연장됨.
+7. 좌측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to popliteal fossa 구간에서 conduction block 소견(5.7/8.5=67%, 33% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음. motor NCV는 Ankle to Popliteal fossa 구간에서 정상임. F-wave latency는 연장됨.
+
+[Sensory nerve conduction study]
+1. 좌측 median nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Finger to Wrist 구간, Palm to Wrist 구간, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Palm to Wrist 구간, Finger to Wrist 구간에서 감소함. Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임.
+2. 좌측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 측정되지 않음. sensory NCV는 Ankle to Knee 구간에서 측정되지 않음.
+3. 좌측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 정상범위임. sensory NCV는 Posterior Calf 구간에서 정상범위임.
+4. 우측 median nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Finger to Wrist 구간, Palm to Wrist 구간, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Palm to Wrist 구간, Finger to Wrist 구간에서 감소함. Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임.
+5. 우측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 측정되지 않음. sensory NCV는 Ankle to Knee 구간에서 측정되지 않음.
+6. 우측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 정상범위임. sensory NCV는 Posterior Calf 구간에서 정상범위임.
+7. 우측 ulnar nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Finger to Wrist 구간, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Elbow to Axilla 구간, Finger to Wrist 구간, Wrist to Elbow 구간에서 정상범위임.
+
+[H-wave study]
+1. 우측 tibial nerve H-wave latency는 연장됨.
+2. 좌측 tibial nerve H-wave latency는 연장됨.
+
+[Demyelinating features]
+1. 우측 tibial nerve에서 우측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to popliteal fossa 구간에서 conduction block 소견(5.2/8.6=60%, 40% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음.
+2. 좌측 tibial nerve에서 좌측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 정상 범위. ankle to popliteal fossa 구간에서 conduction block 소견(5.7/8.5=67%, 33% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음.`,
+        groundTruth: `1. Electrophysiological findings suggest bilateral carpal tunnel syndrome (both sides: Grade III).
+2. Electrophysiological findings are suspicious for co-existing early stage of polyneuropathy or lumbosacral radiculopathy. An EMG study is recommended to differentiate radiculopathy.
+3. In this elderly patient over the age of 60, the abnormal findings in the bilateral superficial peroneal nerves are considered to be due to old age.
+4. Clinical correlation is recommended.`,
+        additional: [
+          `# 1)
+1. Electrophysiological findings suggest bilateral carpal tunnel syndrome, as evidenced by prolonged terminal latencies and reduced distal sensory conduction velocities in both median nerves.
+2. In the lower extremities, prolonged F‑wave latencies, conduction blocks in the tibial nerves (not considered demyelinating for the tibial nerve), and reduced CMAP amplitude in the right peroneal nerve raise suspicion for early stage sensorimotor polyneuropathy or lumbosacral radiculopathy; further EMG evaluation is recommended.
+3. Clinical correlation is required.`,
+          `# 2)
+1. Electrophysiological findings suggest bilateral carpal tunnel syndrome (Grade 2).
+2. Electrophysiological findings are suspicious for early stage of polyneuropathy or lumbosacral radiculopathy. An EMG study is recommended to differentiate radiculopathy.
+3. For bilateral tibial nerves showing conduction block with normal motor conduction velocity, consideration of a potential technical error is necessary.
+4. Clinical correlation is required.`,
+          `# 3)
+1. Electrophysiological findings are suspicious for early stage of polyneuropathy or lumbosacral radiculopathy. An EMG study is recommended to differentiate radiculopathy.
+2. Electrophysiological findings suggest conduction block in right and left tibial nerve. However, motor conduction velocity is within the normal range, warranting consideration of a potential technical error.
+3. Electrophysiological findings suggest sensory polyneuropathy.
+4. Clinical correlation is required.`,
+          `# Clinical rationale
+1. Prolonged terminal latencies and decreased sensory NCV in both median nerves are consistent with carpal tunnel syndrome.  
+2. Normal CMAP amplitudes and preserved motor NCV in the median nerves support a focal entrapment at the wrist.  
+3. Prolonged F‑wave latencies in the peroneal and tibial nerves, along with a conduction block in the tibial nerves, raise suspicion for early sensorimotor polyneuropathy or lumbosacral radiculopathy.  
+4. Bilateral prolonged H‑wave latencies further suggest proximal conduction delays possibly involving lumbosacral roots.  
+5. Further EMG evaluation and clinical correlation are necessary to differentiate and confirm these overlapping pathologies.`
+        ]
+      },
+      {
+        ncs: `[Motor nerve conduction study + F-Wave study]
+1. 우측 median nerve에서 terminal latency는 demyelinating range로 연장됨.(6.2/3.6=172%) CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 감소함. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 감소함. F-wave latency는 측정되지 않음.
+2. 우측 peroneal nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ta에서 자극시 정상 범위. ankle, fibula (head)에서 자극시 감소함. motor NCV는 Ankle to Fibula (head) 구간에서 정상임. F-wave latency는 연장됨.
+3. 우측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 감소함. motor NCV는 Ankle to Popliteal fossa 구간에서 정상임. F-wave latency는 연장됨.
+4. 우측 ulnar nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 감소함. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+5. 좌측 median nerve에서 terminal latency는 정상임. CMAP의 amplitude는 정보가 없음. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 측정되지 않음. F-wave latency는 측정되지 않음.
+6. 좌측 peroneal nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ta에서 자극시 정상 범위. ankle, fibula (head)에서 자극시 감소함. motor NCV는 Ankle to Fibula (head) 구간에서 정상임. F-wave latency는 연장됨.
+7. 좌측 tibial nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ankle에서 자극시 정상 범위. popliteal fossa에서 자극시 감소함. motor NCV는 Ankle to Popliteal fossa 구간에서 정상임. F-wave latency는 연장됨.
+8. 좌측 ulnar nerve에서 terminal latency는 정상임. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+
+[Sensory nerve conduction study]
+1. 좌측 median nerve에서 SNAP amplitude는 Elbow to Axilla 구간에서 정상 범위이나 반대측에 비해 50% 이상 감소함. Wrist to Elbow 구간, Finger to Wrist 구간에서 측정되지 않음. sensory NCV는 Elbow to Axilla 구간에서 감소함. Wrist to Elbow 구간, Finger to Wrist 구간에서 측정되지 않음.
+2. 좌측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 정상범위임. sensory NCV는 Ankle to Knee 구간에서 정상범위임.
+3. 좌측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 정상범위임. sensory NCV는 Posterior Calf 구간에서 정상범위임.
+4. 좌측 ulnar nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음. sensory NCV는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음.
+5. 우측 median nerve에서 SNAP amplitude는 Wrist to Elbow 구간에서 감소함. Elbow to Axilla 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음. sensory NCV는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 감소함. Finger to Wrist 구간에서 측정되지 않음.
+6. 우측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 정상범위임. sensory NCV는 Ankle to Knee 구간에서 정상범위임.
+7. 우측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 정상범위임. sensory NCV는 Posterior Calf 구간에서 정상범위임.
+8. 우측 ulnar nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음. sensory NCV는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음.
+
+[H-wave study]
+1. 우측 tibial nerve H-wave latency는 정상범위임.
+2. 좌측 tibial nerve H-wave latency는 정상범위임.`,
+        groundTruth: `1. This result is strongly suggestive of sensorimotor polyneuropathy (axonal type).
+2. Consideration is needed for the possibility of co-existing bilateral carpal tunnel syndrome (right: Grade 4, left: Grade 6).
+3. Clinical correlation is required.`,
+        additional: [
+          `# 1)
+1. Electrophysiological findings strongly suggest sensorimotor polyneuropathy (demyelinating type), as evidenced by demyelinating-range distal latency, reduced motor conduction velocity, and decreased CMAP amplitudes in multiple nerves.
+2. Clinical correlation is required.`,
+          `# 2)
+1. Electrophysiological findings strongly suggest sensorimotor polyneuropathy (demyelinating type).
+2. Clinical correlation is required.`,
+          `# 3)
+1. Electrophysiological findings strongly suggest sensorimotor polyneuropathy (demyelinating type).
+2. Electrophysiological findings weakly suggest motor polyneuropathy (axonal type).
+3. Clinical correlation is required.`,
+          `# Clinical rationale
+1. The right median nerve shows a markedly prolonged distal latency (demyelinating range) with reduced motor NCV and CMAP amplitude.  
+2. Multiple nerves (e.g., ulnar, peroneal, tibial) demonstrate reduced amplitudes or prolonged latencies, suggesting diffuse involvement.  
+3. Sensory deficits include reduced SNAP amplitudes and slowed sensory NCV in both upper and lower extremities.  
+4. The presence of both motor and sensory abnormalities points to a sensorimotor polyneuropathy rather than a focal neuropathy.  
+5. Overall findings meet demyelinating criteria, warranting consideration of a systemic demyelinating process and clinical correlation. `
+        ]
+      },
+      {
+        ncs: `[Motor nerve conduction study + F-Wave study]
+1. 우측 median nerve에서 terminal latency는 demyelinating range로 연장됨.(6.5/3.6=181%) CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+2. 우측 peroneal nerve에서 terminal latency는 demyelinating range로 연장됨.(7.6/4.78=159%) CMAP의 amplitude는 ta에서 자극시 정상 범위. ankle, fibula (head)에서 자극시 감소함. motor NCV는 Ankle to Fibula (head) 구간에서 demyelinating range(27.0/41.85=65%, 35% 감소). F-wave latency는 측정되지 않음.
+3. 우측 tibial nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 감소함. ankle to popliteal fossa 구간에서 conduction block 소견(3.0/4.6=65%, 35% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음. motor NCV는 Ankle to Popliteal fossa 구간에서 감소함. F-wave latency는 연장됨.
+4. 우측 ulnar nerve에서 terminal latency는 demyelinating range로 연장됨.(3.8/2.51=151%) CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+5. 좌측 median nerve에서 terminal latency는 demyelinating range로 연장됨.(7.0/3.6=194%) CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 감소함. F-wave latency는 연장됨.
+6. 좌측 peroneal nerve에서 terminal latency는 정상임. CMAP의 amplitude는 ta에서 자극시 정상 범위. fibula (head)에서 자극시 감소함. motor NCV는 Ankle to Fibula (head) 구간에서 demyelinating range(21.0/41.85=50%, 50% 감소). F-wave latency는 측정되지 않음.
+7. 좌측 tibial nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 감소함. ankle to popliteal fossa 구간에서 conduction block 소견(2.2/3.6=61%, 39% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음. motor NCV는 Ankle to Popliteal fossa 구간에서 감소함. F-wave latency는 연장됐으나 distal CMAP amplitude가 정상 하한치의 80% 미만이므로, demyelinating parameter에 해당하지 않음. (66.7/53.95 * 100 = 124%)
+8. 좌측 ulnar nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 axilla, elbow, wrist에서 자극시 정상 범위. motor NCV는 Elbow to Axilla, Wrist to Elbow 구간에서 정상임. F-wave latency는 연장됨.
+
+[Sensory nerve conduction study]
+1. 좌측 median nerve에서 SNAP amplitude는 Finger to Wrist 구간에서 감소함. Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. sensory NCV는 Elbow to Axilla 구간, Wrist to Elbow 구간, Finger to Wrist 구간에서 감소함.
+2. 좌측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 측정되지 않음. sensory NCV는 Ankle to Knee 구간에서 측정되지 않음.
+3. 좌측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 측정되지 않음. sensory NCV는 Posterior Calf 구간에서 측정되지 않음.
+4. 좌측 ulnar nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음. sensory NCV는 Wrist to Elbow 구간에서 감소함. Elbow to Axilla 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음.
+5. 우측 median nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음. sensory NCV는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 감소함. Finger to Wrist 구간에서 측정되지 않음.
+6. 우측 superficial peroneal nerve에서 SNAP amplitude는 Ankle to Knee 구간에서 측정되지 않음. sensory NCV는 Ankle to Knee 구간에서 측정되지 않음.
+7. 우측 sural nerve에서 SNAP amplitude는 Posterior Calf 구간에서 정상범위임. sensory NCV는 Posterior Calf 구간에서 감소함.
+8. 우측 ulnar nerve에서 SNAP amplitude는 Elbow to Axilla 구간, Wrist to Elbow 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음. sensory NCV는 Wrist to Elbow 구간에서 감소함. Elbow to Axilla 구간에서 정상범위임. Finger to Wrist 구간에서 측정되지 않음.
+
+[H-wave study]
+1. 우측 tibial nerve H-wave latency는 연장됨.
+2. 좌측 tibial nerve H-wave latency는 연장됨.
+
+[Demyelinating features]
+1. 우측 peroneal nerve에서 motor NCV는 Ankle to Fibula (head) 구간에서 demyelinating range(27.0/41.85=65%, 35% 감소).
+2. 우측 tibial nerve에서 우측 tibial nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 감소함. ankle to popliteal fossa 구간에서 conduction block 소견(3.0/4.6=65%, 35% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음.
+3. 좌측 median nerve에서 distal CMAP duration은 demyelinating range로 연장됨(>7.4ms)
+4. 좌측 peroneal nerve에서 motor NCV는 Ankle to Fibula (head) 구간에서 demyelinating range(21.0/41.85=50%, 50% 감소).
+5. 좌측 tibial nerve에서 distal CMAP duration은 demyelinating range로 연장됨(>8.0ms) 그리고 좌측 tibial nerve에서 terminal latency는 연장됨. CMAP의 amplitude는 ankle, popliteal fossa에서 자극시 감소함. ankle to popliteal fossa 구간에서 conduction block 소견(2.2/3.6=61%, 39% 감소)가 관찰되나 tibial nerve이므로 demyelinating parameter에는 해당되지 않음.
+6. 좌측 ulnar nerve에서 distal CMAP duration은 demyelinating range로 연장됨(>7.8ms)`,
+        groundTruth: `1. This result is strongly suggestive of sensorimotor polyneuropathy(demyelinating type).
+2. clinical correlation`,
+        additional: [
+          `# 1)
+1. Electrophysiological findings strongly suggest sensorimotor polyneuropathy (demyelinating type).
+2. Clinical correlation is required.`,
+          `# 2)
+1. Electrophysiological findings strongly suggest sensorimotor polyneuropathy (demyelinating type).
+2. Clinical correlation is required.`,
+          `# 3)
+1. Electrophysiological findings strongly suggest sensorimotor polyneuropathy (demyelinating type).
+2. Electrophysiological findings weakly suggest motor polyneuropathy (axonal type).
+3. Clinical correlation is required.`,
+          `# Clinical rationale
+1. Multiple nerves (median, ulnar, peroneal) demonstrate demyelinating-range distal latencies and slowed conduction velocities.  
+2. Conduction blocks and reduced amplitudes occur in both upper and lower extremities, reflecting global motor involvement.  
+3. Sensory nerve studies reveal decreased sensory nerve action potentials and slowed sensory conduction velocities, suggesting a combined sensorimotor process.  
+4. Despite tibial nerve conduction block not being classified as a demyelinating parameter for tibial nerves, the presence of widespread demyelinating features strongly indicates a systemic process.  
+5. Overall, these findings meet criteria for a demyelinating-type sensorimotor polyneuropathy, necessitating further clinical evaluation.`
+        ]
+      }
+    ];
+
+    const totalQuestions = questionsData.length;
+    let currentQuestion = 1;
+    const container = document.getElementById('question-container');
+    const sidebarLinksContainer = document.getElementById('sidebar-links');
+    // 개선된 평가 항목 레이블 (4개)
+    const ratingItems = [
+      "1",
+      "2",
+      "3",
+      "4"
+    ];
+    const ratingLabels = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
+
+    // 왼쪽 툴바에 문제 링크 생성 (총 5문항)
+    for (let i = 1; i <= totalQuestions; i++) {
+      const link = document.createElement('a');
+      link.href = '#';
+      link.textContent = '문제 ' + i;
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        currentQuestion = i;
+        updatePage();
+      });
+      sidebarLinksContainer.appendChild(link);
+    }
+
+    // 각 문제 섹션 생성
+    questionsData.forEach((qData, index) => {
+      const qNum = index + 1;
+      const section = document.createElement('section');
+      section.id = 'question-' + qNum;
+      if (qNum === 1) section.classList.add('active');
+
+      // 헤더 (NO. X)
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'question-header';
+      const h2 = document.createElement('h2');
+      h2.textContent = 'NO. ' + qNum;
+      headerDiv.appendChild(h2);
+      section.appendChild(headerDiv);
+
+      // NCS 내용 영역
+      const ncsDiv = document.createElement('div');
+      ncsDiv.className = 'ncs-content';
+      ncsDiv.textContent = qData.ncs;
+      section.appendChild(ncsDiv);
+
+      // Ground Truth 영역
+      const gtDiv = document.createElement('div');
+      gtDiv.className = 'ground-truth';
+      const gtTitle = document.createElement('h3');
+      gtTitle.textContent = 'Ground Truth';
+      gtDiv.appendChild(gtTitle);
+      const gtContent = document.createElement('p');
+      gtContent.textContent = qData.groundTruth;
+      gtDiv.appendChild(gtContent);
+      section.appendChild(gtDiv);
+
+      // 추가 내용 영역: 좌측 번호와 오른쪽 내용 (카드 형태)
+      qData.additional.forEach((part, idx) => {
+        let formattedPart = part.replace(/^#\s*\d+\)\s*/, '').replace(/^#\s*/, '');
+        const additionalContainer = document.createElement('div');
+        additionalContainer.className = 'additional-container';
+        
+        const numDiv = document.createElement('div');
+        numDiv.className = 'additional-number';
+        numDiv.textContent = idx + 1;
+        
+        const textDiv = document.createElement('div');
+        textDiv.className = 'additional-text';
+        textDiv.textContent = formattedPart;
+        
+        additionalContainer.appendChild(numDiv);
+        additionalContainer.appendChild(textDiv);
+        section.appendChild(additionalContainer);
+      });
+
+      // 평가 영역: 4개의 평가 항목 (라디오 버튼 5점 스케일)
+      const ratingSection = document.createElement('div');
+      ratingSection.className = 'rating-section';
+      const ratingTitle = document.createElement('h4');
+      ratingTitle.textContent = '평가 (Rating)';
+      ratingSection.appendChild(ratingTitle);
+
+      for (let item = 1; item <= 4; item++) {
+        const ratingItemDiv = document.createElement('div');
+        ratingItemDiv.className = 'rating-item';
+
+        const label = document.createElement('label');
+        // 개선된 평가 항목 레이블 사용
+        label.textContent = ratingItems[item - 1];
+        ratingItemDiv.appendChild(label);
+
+        const optionsDiv = document.createElement('div');
+        optionsDiv.className = 'rating-options';
+        for (let rating = 1; rating <= 5; rating++) {
+          const radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'rating_q' + qNum + '_item' + item;
+          radio.value = rating;
+          radio.id = 'q' + qNum + '_item' + item + '_rating' + rating;
+
+          const radioLabel = document.createElement('label');
+          radioLabel.htmlFor = radio.id;
+          radioLabel.textContent = rating + ' - ' + ratingLabels[rating - 1];
+
+          optionsDiv.appendChild(radio);
+          optionsDiv.appendChild(radioLabel);
+        }
+        ratingItemDiv.appendChild(optionsDiv);
+        ratingSection.appendChild(ratingItemDiv);
+      }
+      section.appendChild(ratingSection);
+      container.appendChild(section);
+    });
+
+    // 네비게이션 버튼 요소
+    const prevButton = document.getElementById('prevButton');
+    const nextButton = document.getElementById('nextButton');
+    const submitButton = document.getElementById('submitButton');
+    const progressIndicator = document.getElementById('progressIndicator');
+
+    function updatePage() {
+      document.querySelectorAll('.question-container section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+      const currentSec = document.getElementById('question-' + currentQuestion);
+      if (currentSec) currentSec.classList.add('active');
+
+      progressIndicator.textContent = '문제 ' + currentQuestion + ' / ' + totalQuestions;
+
+      prevButton.disabled = currentQuestion === 1;
+      if (currentQuestion === totalQuestions) {
+        nextButton.style.display = 'none';
+        submitButton.style.display = 'inline-block';
+      } else {
+        nextButton.style.display = 'inline-block';
+        submitButton.style.display = 'none';
+      }
+    }
+
+    prevButton.addEventListener('click', function() {
+      if (currentQuestion > 1) {
+        currentQuestion--;
+        updatePage();
+      }
+    });
+
+    nextButton.addEventListener('click', function() {
+      if (currentQuestion < totalQuestions) {
+        currentQuestion++;
+        updatePage();
+      }
+    });
+
+    // 제출 버튼: 평가 결과를 CSV 파일로 생성 후 다운로드
+    submitButton.addEventListener('click', function() {
+      let csvContent = 'Question,Item1,Item2,Item3,Item4\n';
+      for (let q = 1; q <= totalQuestions; q++) {
+        let row = '문제 ' + q;
+        for (let item = 1; item <= 4; item++) {
+          const radios = document.getElementsByName('rating_q' + q + '_item' + item);
+          let selected = '';
+          for (const radio of radios) {
+            if (radio.checked) {
+              selected = radio.value;
+              break;
+            }
+          }
+          row += ',' + selected;
+        }
+        csvContent += row + '\n';
+      }
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ratings.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  </script>
+</body>
+</html>
