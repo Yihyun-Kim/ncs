@@ -107,6 +107,10 @@
       border-radius: 4px;
       padding: 10px;
     }
+    /* Clinical rationale에 대한 별도 스타일 */
+    .clinical-rationale {
+      background-color: #fff0e0;
+    }
     .additional-number {
       font-weight: bold;
       margin-right: 15px;
@@ -450,12 +454,12 @@
     let currentQuestion = 1;
     const container = document.getElementById('question-container');
     const sidebarLinksContainer = document.getElementById('sidebar-links');
-    // 개선된 평가 항목 레이블 (4개)
+    // 평가 항목 레이블 (기존 "1", "2", "3", "4"에서 4번을 "Clinical Rationale"로 변경)
     const ratingItems = [
       "1",
       "2",
       "3",
-      "4"
+      "Clinical Rationale"
     ];
     const ratingLabels = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
 
@@ -504,20 +508,43 @@
       gtDiv.appendChild(gtContent);
       section.appendChild(gtDiv);
 
-      // 추가 내용 영역: 좌측 번호와 오른쪽 내용 (카드 형태)
+      // 추가 내용 영역: "Clinical rationale" 항목은 별도 배열에 모아서 마지막에 추가
+      const nonClinicalParts = [];
+      const clinicalParts = [];
       qData.additional.forEach((part, idx) => {
+        // 원래 텍스트에서 앞의 "# ..." 제거
         let formattedPart = part.replace(/^#\s*\d+\)\s*/, '').replace(/^#\s*/, '');
+        if (part.toLowerCase().includes('clinical rationale')) {
+          clinicalParts.push({ index: idx, text: formattedPart });
+        } else {
+          nonClinicalParts.push({ index: idx, text: formattedPart });
+        }
+      });
+      // 먼저 일반 추가 내용 항목 추가
+      nonClinicalParts.forEach(item => {
         const additionalContainer = document.createElement('div');
         additionalContainer.className = 'additional-container';
-        
         const numDiv = document.createElement('div');
         numDiv.className = 'additional-number';
-        numDiv.textContent = idx + 1;
-        
+        numDiv.textContent = item.index + 1;
         const textDiv = document.createElement('div');
         textDiv.className = 'additional-text';
-        textDiv.textContent = formattedPart;
-        
+        textDiv.textContent = item.text;
+        additionalContainer.appendChild(numDiv);
+        additionalContainer.appendChild(textDiv);
+        section.appendChild(additionalContainer);
+      });
+      // 그 후 "Clinical rationale" 항목 추가 (있다면)
+      clinicalParts.forEach(item => {
+        const additionalContainer = document.createElement('div');
+        additionalContainer.className = 'additional-container clinical-rationale';
+        const numDiv = document.createElement('div');
+        numDiv.className = 'additional-number';
+        // clinical rationale는 "4"가 아닌 "Clinical Rationale"으로 표기
+        numDiv.textContent = "Clinical Rationale";
+        const textDiv = document.createElement('div');
+        textDiv.className = 'additional-text';
+        textDiv.textContent = item.text;
         additionalContainer.appendChild(numDiv);
         additionalContainer.appendChild(textDiv);
         section.appendChild(additionalContainer);
@@ -535,7 +562,7 @@
         ratingItemDiv.className = 'rating-item';
 
         const label = document.createElement('label');
-        // 개선된 평가 항목 레이블 사용
+        // 변경된 평가 항목 레이블 사용 (네 번째는 "Clinical Rationale")
         label.textContent = ratingItems[item - 1];
         ratingItemDiv.appendChild(label);
 
