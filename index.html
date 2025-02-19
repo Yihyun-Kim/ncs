@@ -184,6 +184,23 @@
       font-size: 18px;
       font-weight: bold;
     }
+    .memo-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f4f4f4;
+      border-radius: 4px;
+    }
+    .memo-section textarea {
+      width: 100%;
+      height: 150px; /* 평가 영역과 비슷한 높이로 설정 */
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+      margin-top: 5px;
+    }
+
   </style>
 </head>
 <body>
@@ -456,6 +473,7 @@
     const sidebarLinksContainer = document.getElementById('sidebar-links');
     // 평가 항목 레이블 (기존 "1", "2", "3", "4"에서 4번을 "Clinical Rationale"로 변경)
     const ratingItems = [
+      "NCS",
       "1",
       "2",
       "3",
@@ -557,7 +575,7 @@
       ratingTitle.textContent = '평가 (Rating)';
       ratingSection.appendChild(ratingTitle);
 
-      for (let item = 1; item <= 4; item++) {
+      for (let item = 1; item <= 5; item++) {
         const ratingItemDiv = document.createElement('div');
         ratingItemDiv.className = 'rating-item';
 
@@ -586,6 +604,20 @@
         ratingSection.appendChild(ratingItemDiv);
       }
       section.appendChild(ratingSection);
+
+      // Memo 영역 추가
+      const memoDiv = document.createElement('div');
+      memoDiv.className = 'memo-section';
+      const memoLabel = document.createElement('label');
+      memoLabel.textContent = 'Memo:';
+      memoDiv.appendChild(memoLabel);
+      const memoTextarea = document.createElement('textarea');
+      memoTextarea.name = 'memo_q' + qNum;
+      memoTextarea.rows = 4;
+      memoTextarea.placeholder = '메모를 입력하세요...';
+      memoDiv.appendChild(memoTextarea);
+      section.appendChild(memoDiv);
+
       container.appendChild(section);
     });
 
@@ -630,10 +662,10 @@
 
     // 제출 버튼: 평가 결과를 CSV 파일로 생성 후 다운로드
     submitButton.addEventListener('click', function() {
-      let csvContent = 'Question,Item1,Item2,Item3,Item4\n';
+      let csvContent = 'Question,Item1,Item2,Item3,Item4,Item5,Memo\n';
       for (let q = 1; q <= totalQuestions; q++) {
         let row = '문제 ' + q;
-        for (let item = 1; item <= 4; item++) {
+        for (let item = 1; item <= 5; item++) {
           const radios = document.getElementsByName('rating_q' + q + '_item' + item);
           let selected = '';
           for (const radio of radios) {
@@ -644,6 +676,8 @@
           }
           row += ',' + selected;
         }
+        const memoValue = document.getElementsByName('memo_q' + q)[0].value.replace(/\n/g, ' ');
+        row += ',' + memoValue;
         csvContent += row + '\n';
       }
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
