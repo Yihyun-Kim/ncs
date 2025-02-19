@@ -512,7 +512,12 @@
       // NCS 내용 영역
       const ncsDiv = document.createElement('div');
       ncsDiv.className = 'ncs-content';
-      ncsDiv.textContent = qData.ncs;
+      const ncsTitle = document.createElement('h3');
+      ncsTitle.textContent = 'NCS';
+      ncsDiv.appendChild(ncsTitle);
+      const ncsContent = document.createElement('p');
+      ncsContent.textContent = qData.ncs;
+      ncsDiv.appendChild(ncsContent);
       section.appendChild(ncsDiv);
 
       // Ground Truth 영역
