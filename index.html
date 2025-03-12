@@ -46,8 +46,9 @@
     }
     /* 메인 콘텐츠 영역 */
     .main-wrapper {
-      margin-left: 260px; /* 툴바 공간 고려 */
+      margin-left: 260px; /* 사이드바 너비 및 여백 고려 */
       width: 100%;
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -203,33 +204,29 @@
   </style>
 </head>
 <body>
-  <!-- 왼쪽 고정 툴바 -->
+  <!-- 왼쪽 사이드바 -->
   <div id="sidebar">
-    <h3>문제 선택</h3>
-    <div id="sidebar-links">
-      <!-- 자바스크립트로 문제 링크 생성 -->
-    </div>
+    <h3 id="sidebar-title">문제 범위 선택</h3>
+    <div id="sidebar-links"></div>
   </div>
 
-  <!-- 메인 콘텐츠 영역 -->
+  <!-- 메인 컨텐츠 영역 -->
   <div class="main-wrapper">
+    <!-- 질문 컨테이너 -->
     <div class="question-container" id="question-container">
-      <!-- 문제 섹션들을 자바스크립트로 생성 -->
+      <!-- 질문 내용이 들어갈 섹션들을 여기에 추가 -->
     </div>
-    <!-- 하단 네비게이션 버튼 -->
+
+    <!-- 네비게이션 버튼 -->
     <div class="nav-buttons">
       <button id="prevButton">이전</button>
-      <span class="progress" id="progressIndicator">문제 1 / 10</span>
-      <div>
-        <button id="nextButton">다음</button>
-        <button id="submitButton" style="display: none;">제출</button>
-      </div>
+      <span id="progressIndicator"></span>
+      <button id="nextButton">다음</button>
+      <button id="submitButton" style="display: none;">제출</button>
     </div>
   </div>
-
   <script>
-    // 10문항 데이터를 직접 정의 (CSV 없이)
-    // 칼럼: Ground truth, NCS, 1,2,3,4,5, Clinical Rationale
+    // 예시 질문 데이터 (여기서는 총 71문항)
     const questionsData = [
       // No.1
       {
@@ -4436,41 +4433,109 @@
   ]
 },
     ];
+    // 실제 데이터는 기존과 동일한 구조로 71개 객체가 들어가 있다고 가정합니다.
+    // (아래에서는 데모용으로 71개 빈 객체를 채워넣음)
+    /*for(let i=0;i<71;i++){
+      questionsData.push({
+        ncs: "NCS 내용 예시 " + (i+1),
+        groundTruth: "Ground Truth 예시 " + (i+1),
+        additional: [
+          "추가 내용 1 for Q" + (i+1),
+          "추가 내용 2 for Q" + (i+1),
+          "추가 내용 3 for Q" + (i+1),
+          "추가 내용 4 for Q" + (i+1),
+          "추가 내용 5 for Q" + (i+1),
+          "Clinical Rationale for Q" + (i+1)
+        ]
+      });
+    }*/
 
-    // 평가 항목 레이블: "NCS", "1", "2", "3", "4", "5", "Clinical Rationale"
     const ratingItems = ["NCS", "1", "2", "3", "4", "5", "Clinical Rationale"];
     const ratingLabels = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
 
     const totalQuestions = questionsData.length;
     let currentQuestion = 1;
+
+    // 사이드바 모드: "ranges" 또는 "questions"
+    let sidebarMode = "ranges"; 
+    let currentRange = null; // {start, end}
+
     const container = document.getElementById('question-container');
     const sidebarLinksContainer = document.getElementById('sidebar-links');
+    const sidebarTitle = document.getElementById('sidebar-title');
     const prevButton = document.getElementById('prevButton');
     const nextButton = document.getElementById('nextButton');
     const submitButton = document.getElementById('submitButton');
     const progressIndicator = document.getElementById('progressIndicator');
 
-    // 왼쪽 툴바에 문제 링크 생성 (총 10문항)
-    for (let i = 1; i <= totalQuestions; i++) {
-      const link = document.createElement('a');
-      link.href = '#';
-      link.textContent = '문제 ' + i;
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        currentQuestion = i;
-        updatePage();
+    // 그룹(범위) 배열 – 문제번호 범위: 1-10, 11-20, 21-30, 31-40, 41-50, 51-60, 61-71
+    const ranges = [
+      { start: 1, end: 10 },
+      { start: 11, end: 20 },
+      { start: 21, end: 30 },
+      { start: 31, end: 40 },
+      { start: 41, end: 50 },
+      { start: 51, end: 60 },
+      { start: 61, end: 71 }
+    ];
+
+    // 함수: 사이드바에 범위 버튼 표시
+    function showRangeSelection() {
+      sidebarMode = "ranges";
+      sidebarTitle.textContent = "문제 범위 선택";
+      sidebarLinksContainer.innerHTML = "";
+      ranges.forEach(range => {
+        const link = document.createElement('a');
+        link.href = "#";
+        link.textContent = range.start + " - " + range.end;
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          currentRange = range;
+          showQuestionLinks(range);
+        });
+        sidebarLinksContainer.appendChild(link);
       });
-      sidebarLinksContainer.appendChild(link);
     }
 
-    // 각 문제 섹션 생성
+    // 함수: 사이드바에 해당 범위의 문제 번호 링크 표시 (예: 1~10)
+    function showQuestionLinks(range) {
+      sidebarMode = "questions";
+      sidebarTitle.textContent = range.start + " ~ " + range.end + " 문제 선택";
+      sidebarLinksContainer.innerHTML = "";
+      // "뒤로" 버튼 링크
+      const backLink = document.createElement('a');
+      backLink.href = "#";
+      backLink.textContent = "← 범위 선택으로 돌아가기";
+      backLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        showRangeSelection();
+      });
+      sidebarLinksContainer.appendChild(backLink);
+      // 문제 번호 링크
+      for (let i = range.start; i <= range.end; i++) {
+        const link = document.createElement('a');
+        link.href = "#";
+        link.textContent = "문제 " + i;
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          currentQuestion = i;
+          updatePage();
+        });
+        sidebarLinksContainer.appendChild(link);
+      }
+    }
+
+    // 초기 사이드바: 범위 선택 표시
+    showRangeSelection();
+
+    // 각 문제 섹션 생성 (모든 71문항)
     questionsData.forEach((qData, index) => {
       const qNum = index + 1;
       const section = document.createElement('section');
       section.id = 'question-' + qNum;
       if (qNum === 1) section.classList.add('active');
 
-      // 헤더 (NO. X)
+      // 헤더
       const headerDiv = document.createElement('div');
       headerDiv.className = 'question-header';
       const h2 = document.createElement('h2');
@@ -4478,7 +4543,7 @@
       headerDiv.appendChild(h2);
       section.appendChild(headerDiv);
 
-      // NCS 내용 영역
+      // NCS 영역
       const ncsDiv = document.createElement('div');
       ncsDiv.className = 'ncs-content';
       const ncsTitle = document.createElement('h3');
@@ -4500,17 +4565,13 @@
       gtDiv.appendChild(gtContent);
       section.appendChild(gtDiv);
 
-      // 추가 내용 영역: "1" ~ "5" + "Clinical Rationale" (6개)
-      // 앞의 5개는 일반, 마지막 하나는 clinical-rationale
-      // qData.additional[0] ~ [4], qData.additional[5]
+      // 추가 내용 영역 (문항 1~5 및 Clinical Rationale)
       for (let i = 0; i < 5; i++) {
         if(qData.additional[i]) {
           const additionalContainer = document.createElement('div');
           additionalContainer.className = 'additional-container';
           const numDiv = document.createElement('div');
           numDiv.className = 'additional-number';
-          // ratingItems 배열: 0:"NCS", 1:"1", 2:"2", 3:"3", 4:"4", 5:"5", 6:"Clinical Rationale"
-          // 여기서는 i+1 => "1"~"5"
           numDiv.textContent = ratingItems[i+1];
           const textDiv = document.createElement('div');
           textDiv.className = 'additional-text';
@@ -4520,13 +4581,13 @@
           section.appendChild(additionalContainer);
         }
       }
-      // 마지막 Clinical Rationale
+      // Clinical Rationale 영역
       if(qData.additional[5]) {
         const additionalContainer = document.createElement('div');
         additionalContainer.className = 'additional-container clinical-rationale';
         const numDiv = document.createElement('div');
         numDiv.className = 'additional-number';
-        numDiv.textContent = ratingItems[ratingItems.length - 1]; // "Clinical Rationale"
+        numDiv.textContent = ratingItems[ratingItems.length - 1];
         const textDiv = document.createElement('div');
         textDiv.className = 'additional-text';
         textDiv.textContent = qData.additional[5];
@@ -4535,21 +4596,18 @@
         section.appendChild(additionalContainer);
       }
 
-      // 평가 영역: 7개 항목 (NCS,1,2,3,4,5,Clinical Rationale)
+      // 평가 영역
       const ratingSection = document.createElement('div');
       ratingSection.className = 'rating-section';
       const ratingTitle = document.createElement('h4');
       ratingTitle.textContent = '평가 (Rating)';
       ratingSection.appendChild(ratingTitle);
-
       for (let item = 0; item < ratingItems.length; item++) {
         const ratingItemDiv = document.createElement('div');
         ratingItemDiv.className = 'rating-item';
-
         const label = document.createElement('label');
         label.textContent = ratingItems[item];
         ratingItemDiv.appendChild(label);
-
         const optionsDiv = document.createElement('div');
         optionsDiv.className = 'rating-options';
         for (let rating = 1; rating <= 5; rating++) {
@@ -4558,11 +4616,9 @@
           radio.name = 'rating_q' + qNum + '_item' + item;
           radio.value = rating;
           radio.id = 'q' + qNum + '_item' + item + '_rating' + rating;
-
           const radioLabel = document.createElement('label');
           radioLabel.htmlFor = radio.id;
           radioLabel.textContent = rating + ' - ' + ratingLabels[rating - 1];
-
           optionsDiv.appendChild(radio);
           optionsDiv.appendChild(radioLabel);
         }
@@ -4571,7 +4627,7 @@
       }
       section.appendChild(ratingSection);
 
-      // Memo 영역
+      // 메모 영역
       const memoDiv = document.createElement('div');
       memoDiv.className = 'memo-section';
       const memoLabel = document.createElement('label');
@@ -4589,26 +4645,39 @@
 
     // 페이지 업데이트 함수
     function updatePage() {
+      // 모든 섹션 숨기기
       document.querySelectorAll('.question-container section').forEach(sec => {
         sec.classList.remove('active');
       });
+      // 현재 문제 섹션 활성화
       const currentSec = document.getElementById('question-' + currentQuestion);
       if (currentSec) currentSec.classList.add('active');
 
       progressIndicator.textContent = '문제 ' + currentQuestion + ' / ' + totalQuestions;
 
+      // 이전 버튼 비활성화 여부
       prevButton.disabled = currentQuestion === 1;
-      if (currentQuestion === totalQuestions) {
-        nextButton.style.display = 'none';
+      
+      // '다음' 버튼과 '제출' 버튼 제어
+      // 현재 문제 번호가 10, 20, 30, 40, 50, 60인 경우 '제출' 버튼을 함께 보이게 함.
+      const submitPoints = [10, 20, 30, 40, 50, 60];
+      if (submitPoints.includes(currentQuestion)) {
+        nextButton.style.display = 'inline-block';
         submitButton.style.display = 'inline-block';
       } else {
-        nextButton.style.display = 'inline-block';
-        submitButton.style.display = 'none';
+        // 일반적으로 마지막 문제(전체문항)에서는 '제출'만 보임.
+        if (currentQuestion === totalQuestions) {
+          nextButton.style.display = 'none';
+          submitButton.style.display = 'inline-block';
+        } else {
+          nextButton.style.display = 'inline-block';
+          submitButton.style.display = 'none';
+        }
       }
     }
     updatePage();
 
-    // 이전 버튼
+    // 이전 버튼 클릭
     prevButton.addEventListener('click', function() {
       if (currentQuestion > 1) {
         currentQuestion--;
@@ -4616,7 +4685,7 @@
       }
     });
 
-    // 다음 버튼
+    // 다음 버튼 클릭
     nextButton.addEventListener('click', function() {
       if (currentQuestion < totalQuestions) {
         currentQuestion++;
@@ -4624,7 +4693,7 @@
       }
     });
 
-    // 제출 버튼: 평가 결과를 CSV 파일로 생성 후 다운로드
+    // 제출 버튼 클릭: 평가 결과를 CSV 파일로 생성 후 다운로드
     submitButton.addEventListener('click', function() {
       let csvContent = 'Question,' + ratingItems.join(',') + ',Memo\n';
       for (let q = 1; q <= totalQuestions; q++) {
